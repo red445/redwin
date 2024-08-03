@@ -22,11 +22,12 @@ jobs:
         & "$Env:UserProfile\ngrok.exe" authtoken ${{ secrets.NGROK_AUTH_TOKEN }}
 
     - name: Start Ngrok
-      run: Start-Process -NoNewWindow -FilePath "$Env:UserProfile\ngrok.exe" -ArgumentList "tcp 3389"
+      run: |
+        Start-Process -NoNewWindow -FilePath "$Env:UserProfile\ngrok.exe" -ArgumentList "tcp 3389" -RedirectStandardOutput ngrok.log -RedirectStandardError ngrok_err.log
 
     - name: Display Ngrok URL
       run: |
-        $retries = 5
+        $retries = 10
         $waitTime = 15
         $ngrok_url = $null
         
@@ -41,6 +42,10 @@ jobs:
         }
         
         if (-not $ngrok_url) {
+          Write-Output "Ngrok output log:"
+          Get-Content ngrok.log | Write-Output
+          Write-Output "Ngrok error log:"
+          Get-Content ngrok_err.log | Write-Output
           throw "Failed to get Ngrok URL after $($retries * $waitTime) seconds."
         }
         
