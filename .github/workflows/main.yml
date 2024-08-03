@@ -19,7 +19,7 @@ jobs:
       run: |
         Invoke-WebRequest -Uri https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-windows-amd64.zip -OutFile ngrok.zip
         Expand-Archive ngrok.zip -DestinationPath $Env:UserProfile
-        $Env:UserProfile\ngrok.exe authtoken 2fuiksclczBNzHjT4yn48cnIJrs_4vwAXL2aKui7Ppqwa8B5E
+        & "$Env:UserProfile\ngrok.exe" authtoken ${{ secrets.NGROK_AUTH_TOKEN }}
 
     - name: Start Ngrok
       run: Start-Process -NoNewWindow -FilePath "$Env:UserProfile\ngrok.exe" -ArgumentList "tcp 3389"
