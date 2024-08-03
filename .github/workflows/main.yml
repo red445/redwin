@@ -26,6 +26,22 @@ jobs:
 
     - name: Display Ngrok URL
       run: |
-        Start-Sleep -s 10
-        $ngrok_url = Invoke-RestMethod -Uri http://localhost:4040/api/tunnels | ConvertFrom-Json
+        $retries = 5
+        $waitTime = 15
+        $ngrok_url = $null
+        
+        for ($i = 0; $i -lt $retries; $i++) {
+          Start-Sleep -s $waitTime
+          try {
+            $ngrok_url = Invoke-RestMethod -Uri http://localhost:4040/api/tunnels | ConvertFrom-Json
+            if ($ngrok_url) { break }
+          } catch {
+            Write-Output "Ngrok not ready, retrying in $waitTime seconds..."
+          }
+        }
+        
+        if (-not $ngrok_url) {
+          throw "Failed to get Ngrok URL after $($retries * $waitTime) seconds."
+        }
+        
         Write-Output "RDP URL: $($ngrok_url.tunnels[0].public_url)"
